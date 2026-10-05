@@ -30,14 +30,13 @@ class Task(Base):
         nullable=False
     )
 
-    destination_url: Mapped[str | None] = mapped_column(
+    destination_url: Mapped[str] = mapped_column(
         Text,
-        nullable=True
+        nullable=False
     )
 
     reward_amount: Mapped[int] = mapped_column(
         Integer,
-        default=0,
         nullable=False
     )
 
@@ -49,7 +48,7 @@ class Task(Base):
 
     cooldown_seconds: Mapped[int] = mapped_column(
         Integer,
-        default=0,
+        default=60,
         nullable=False
     )
 
@@ -78,5 +77,12 @@ class Task(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=datetime.utcnow,
+        nullable=False
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
         nullable=False
     )
