@@ -382,3 +382,108 @@ def approve_task(
         "reward": reward / 100,
         "balance": balance_after / 100,
     }
+@router.post("/referral")
+def create_referral(
+    referral_code: str,
+    init_data: str = Header(..., alias="X-Telegram-Init-Data"),
+    db: Session = Depends(get_db),
+):
+    telegram_user = verify_telegram_init_data(init_data)
+
+    if not telegram_user:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid Telegram authentication"
+        )
+
+    user = get_or_create_user(db, telegram_user)
+
+    if not referral_code.startswith("TP"):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid referral code"
+        )
+
+    try:
+        referrer_telegram_id = int(referral_code[2:])
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid referral code"
+        )
+
+    if referrer_telegram_id == user.telegram_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Self referral is not allowed"
+        )
+
+    referrer = (
+        db.query(User)
+        .filter(User.telegram_id == referrer_telegram_id)
+        .first()
+    )
+
+    if not referrer:
+        raise HTTPException(
+            status_code=404,
+            detail="Referrer not found"
+        )
+
+    existing = db.execute(
+        text("""
+            SELECT id
+            FROM referrals
+            WHERE referred_user_id = :user_id
+            LIMIT 1
+        """),
+        {"user_id": user.id},
+    ).fetchone()
+
+    if existing:
+        return {
+            "success": True,
+            "message": "Referral already registered"
+        }
+
+    now = datetime.utcnow()
+
+    db.execute(
+        text("""
+            INSERT INTO referrals
+            (
+                referrer_user_id,
+                referred_user_id,
+                referral_code,
+                reward_amount,
+                status,
+                created_at,
+                qualified_at
+            )
+            VALUES
+            (
+                :referrer_user_id,
+                :referred_user_id,
+                :referral_code,
+                :reward_amount,
+                'pending',
+                :created_at,
+                NULL
+            )
+        """),
+        {
+            "referrer_user_id": referrer.id,
+            "referred_user_id": user.id,
+            "referral_code": referral_code,
+            "reward_amount": 500,
+            "created_at": now,
+        },
+    )
+
+    db.commit()
+
+    return {
+        "success": True,
+        "message": "Referral registered successfully",
+        "status": "pending"
+    }
