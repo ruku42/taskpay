@@ -299,6 +299,81 @@ def complete_task(
     }
 
 
+@router.get("/admin/tasks/pending")
+def get_pending_tasks(
+    init_data: str = Header(..., alias="X-Telegram-Init-Data"),
+    db: Session = Depends(get_db),
+):
+    telegram_user = verify_telegram_init_data(init_data)
+
+    if not telegram_user:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid Telegram authentication"
+        )
+
+    admin = db.execute(
+        text("""
+            SELECT id
+            FROM admin_users
+            WHERE telegram_id = :telegram_id
+            AND role = 'super_admin'
+            AND status = 'active'
+            LIMIT 1
+        """),
+        {
+            "telegram_id": int(telegram_user.get("id"))
+        },
+    ).fetchone()
+
+    if not admin:
+        raise HTTPException(
+            status_code=403,
+            detail="Admin access required"
+        )
+
+    rows = db.execute(
+        text("""
+            SELECT
+                tc.id,
+                tc.user_id,
+                u.telegram_id,
+                u.username,
+                u.first_name,
+                tc.task_id,
+                t.title,
+                t.task_type,
+                t.destination_url,
+                tc.reward_amount,
+                tc.verification_status,
+                tc.created_at
+            FROM task_completions tc
+            JOIN users u ON u.id = tc.user_id
+            JOIN tasks t ON t.id = tc.task_id
+            WHERE tc.verification_status = 'pending'
+            ORDER BY tc.created_at ASC
+        """)
+    ).fetchall()
+
+    return [
+        {
+            "completion_id": row.id,
+            "user_id": row.user_id,
+            "telegram_id": row.telegram_id,
+            "username": row.username,
+            "first_name": row.first_name,
+            "task_id": row.task_id,
+            "title": row.title,
+            "task_type": row.task_type,
+            "url": row.destination_url,
+            "reward": row.reward_amount / 100,
+            "status": row.verification_status,
+            "created_at": row.created_at.isoformat(),
+        }
+        for row in rows
+    ]
+
+
 @router.post("/admin/tasks/{completion_id}/approve")
 def approve_task(
     completion_id: int,
