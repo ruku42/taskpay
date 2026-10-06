@@ -7,6 +7,7 @@ from fastapi.responses import FileResponse
 from telegram import Update
 
 from app.bot import create_bot
+from app.routes import router
 
 
 WEB_APP_FILE = Path(__file__).resolve().parents[2] / "frontend" / "index.html"
@@ -35,7 +36,12 @@ async def lifespan(app):
     await telegram_bot.shutdown()
 
 
-app = FastAPI(title="TaskPay API", lifespan=lifespan)
+app = FastAPI(
+    title="TaskPay API",
+    lifespan=lifespan
+)
+
+app.include_router(router)
 
 
 @app.post("/telegram/webhook")
@@ -54,12 +60,17 @@ async def telegram_webhook(request: Request):
 
 @app.get("/")
 def root():
-    return {"app": "TaskPay", "status": "running"}
+    return {
+        "app": "TaskPay",
+        "status": "running"
+    }
 
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {
+        "status": "ok"
+    }
 
 
 @app.get("/app")
