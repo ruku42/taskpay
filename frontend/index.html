@@ -182,7 +182,7 @@ button{
     padding:25px 0 12px;
 }
 </style>
-</head>
+<script src="https://telegram.org/js/telegram-web-app.js"></script></head>
 
 <body>
 
@@ -267,7 +267,7 @@ button{
             Referrer এবং নতুন সদস্য উভয়েই ৳5 Reward পাবেন।
             প্রথম Withdraw-এর আগে ৫টি Valid Referral প্রয়োজন।
         </p>
-        <button>🔗 Referral Link শেয়ার করুন</button>
+        <button id="referral-share-btn">🔗 Referral Link শেয়ার করুন</button>
     </div>
 
     <h2 class="section-title">🛡️ নিরাপত্তা</h2>
@@ -353,3 +353,28 @@ loadTasks();
 </script>
 \n</body>
 </html>
+
+<script>
+const referralButton = document.getElementById("referral-share-btn");
+
+if (referralButton) {
+    referralButton.addEventListener("click", () => {
+        const tg = window.Telegram?.WebApp;
+        const telegramUser = tg?.initDataUnsafe?.user;
+
+        if (!telegramUser?.id) {
+            alert("⚠️ Telegram থেকে Mini App খুলুন।");
+            return;
+        }
+
+        const referralCode = `TP${telegramUser.id}`;
+        const referralLink = `https://t.me/TaskPayOfficialBD_bot?start=${referralCode}`;
+
+        if (tg?.openTelegramLink) {
+            tg.openTelegramLink(referralLink);
+        } else {
+            window.open(referralLink, "_blank");
+        }
+    });
+}
+</script>
