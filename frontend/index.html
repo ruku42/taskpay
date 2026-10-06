@@ -219,7 +219,7 @@ button{
         </div>
 
         <div class="actions">
-            <button class="deposit">💳 Deposit</button>
+            <button id="deposit-top-btn" class="deposit">💳 Deposit</button>
             <button class="withdraw">💸 Withdraw</button>
         </div>
     </section>
@@ -388,6 +388,8 @@ loadTasks();
 
 <script>
 const depositButton = document.getElementById("deposit-request-btn");
+const topDepositButton = document.getElementById("deposit-top-btn");
+if (topDepositButton && depositButton) topDepositButton.addEventListener("click", () => depositButton.click());
 
 if (depositButton) {
     depositButton.addEventListener("click", async () => {
