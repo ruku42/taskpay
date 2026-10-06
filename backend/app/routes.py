@@ -126,9 +126,7 @@ def complete_task(
     existing = db.query(TaskCompletion).filter(
         TaskCompletion.user_id == user.id,
         TaskCompletion.task_id == task.id,
-        TaskCompletion.verification_status.in_(
-            ["pending", "verified"]
-        )
+        TaskCompletion.verification_status.in_(["pending", "verified"])
     ).first()
 
     if existing:
@@ -198,7 +196,7 @@ def complete_task(
                     detail="Daily task limit reached."
                 )
 
-    reward_paisa = int(round(float(task.reward_amount) * 100))
+    reward_paisa = int(task.reward_amount)
 
     completion = TaskCompletion(
         user_id=user.id,
@@ -257,9 +255,10 @@ def complete_task(
         "success": True,
         "status": "pending",
         "message": "Task submitted for verification",
-        "reward": task.reward_amount,
+        "reward": reward_paisa / 100,
         "balance": balance_before / 100,
     }
+
 
 @router.post("/admin/tasks/{completion_id}/approve")
 def approve_task(
