@@ -13,6 +13,7 @@ from app.seed_tasks import seed_tasks
 
 
 WEB_APP_FILE = Path(__file__).resolve().parents[2] / "frontend" / "index.html"
+ADMIN_WEB_APP_FILE = Path(__file__).resolve().parents[2] / "frontend" / "admin.html"
 
 
 @asynccontextmanager
@@ -82,3 +83,8 @@ def health():
 @app.get("/app")
 def mini_app():
     return FileResponse(WEB_APP_FILE)
+
+
+@app.get("/admin")
+def admin_page():
+    return FileResponse(ADMIN_WEB_APP_FILE)

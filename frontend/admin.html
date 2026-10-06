@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskPay Admin</title>
+    <style>
+        body{font-family:Arial,sans-serif;background:#f5f7fb;margin:0;padding:16px;color:#172033}
+        .wrap{max-width:700px;margin:auto}
+        h1{font-size:24px;margin:8px 0 4px}
+        .sub{color:#667085;margin-bottom:18px}
+        .card{background:white;border:1px solid #e4e7ec;border-radius:14px;padding:16px;margin:12px 0}
+        .row{margin:7px 0}
+        .label{font-weight:700}
+        .tx{background:#f2f4f7;padding:10px;border-radius:8px;word-break:break-all}
+        button{border:0;border-radius:10px;padding:12px 16px;font-size:15px;cursor:pointer}
+        .approve{background:#16a34a;color:white;width:100%;margin-top:12px}
+        .refresh{background:#e5e7eb;color:#172033;margin-bottom:10px}
+        .empty{text-align:center;padding:30px;color:#667085}
+        .error{background:#fee4e2;color:#b42318;padding:12px;border-radius:10px}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <h1>🛡️ TaskPay Admin</h1>
+    <div class="sub">💳 Pending Deposit Management</div>
+
+    <button id="refresh-btn" class="refresh">🔄 Refresh</button>
+
+    <div id="message"></div>
+    <div id="deposits"></div>
+</div>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+const tg = window.Telegram?.WebApp;
+tg?.ready();
+
+const depositsBox = document.getElementById("deposits");
+const messageBox = document.getElementById("message");
+const refreshButton = document.getElementById("refresh-btn");
+
+async function loadDeposits() {
+    const initData = tg?.initData;
+
+    if (!initData) {
+        messageBox.innerHTML =
+            '<div class="error">⚠️ Telegram-এর ভিতর থেকে Admin Panel খুলুন।</div>';
+        return;
+    }
+
+    refreshButton.disabled = true;
+    refreshButton.textContent = "⏳ Loading...";
+
+    try {
+        const response = await fetch("/api/admin/deposits/pending", {
+            headers: {
+                "X-Telegram-Init-Data": initData
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.detail || "Admin access পাওয়া যায়নি।");
+        }
+
+        messageBox.innerHTML = "";
+
+        if (!data.length) {
+            depositsBox.innerHTML =
+                '<div class="card empty">✅ কোনো Pending Deposit নেই।</div>';
+            return;
+        }
+
+        depositsBox.innerHTML = data.map(item => `
+            <div class="card">
+                <div class="row">👤 <span class="label">User:</span> ${item.first_name || "Unknown"}</div>
+                <div class="row">🆔 Telegram ID: ${item.telegram_id}</div>
+                <div class="row">💳 Plan: ${item.plan}</div>
+                <div class="row">💰 Amount: ৳${item.amount}</div>
+                <div class="row">📱 Payment: ${item.payment_method}</div>
+                <div class="row">
+                    🧾 Transaction ID:
+                    <div class="tx">${item.transaction_id}</div>
+                </div>
+                <button class="approve" data-id="${item.deposit_id}">
+                    ✅ Approve Deposit
+                </button>
+            </div>
+        `).join("");
+
+        document.querySelectorAll(".approve").forEach(button => {
+            button.addEventListener("click", () => approveDeposit(button.dataset.id));
+        });
+
+    } catch (error) {
+        depositsBox.innerHTML = "";
+        messageBox.innerHTML =
+            `<div class="error">⚠️ ${error.message}</div>`;
+    } finally {
+        refreshButton.disabled = false;
+        refreshButton.textContent = "🔄 Refresh";
+    }
+}
+
+async function approveDeposit(depositId) {
+    const initData = tg?.initData;
+
+    if (!initData) return;
+
+    if (!confirm("এই Deposit-এর টাকা যাচাই করে নিশ্চিত করেছেন?")) {
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `/api/admin/deposits/${depositId}/approve`,
+            {
+                method: "POST",
+                headers: {
+                    "X-Telegram-Init-Data": initData
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert("⚠️ " + (data.detail || "Approve করা যায়নি।"));
+            return;
+        }
+
+        alert(
+            "✅ Deposit Approved!\n\n" +
+            "💳 Plan: " + data.plan + "\n" +
+            "💰 Amount: ৳" + data.amount + "\n" +
+            "🎯 Plan এখন Active।"
+        );
+
+        loadDeposits();
+
+    } catch (error) {
+        alert("⚠️ Approve করতে সমস্যা হয়েছে।");
+    }
+}
+
+refreshButton.addEventListener("click", loadDeposits);
+
+loadDeposits();
+</script>
+</body>
+</html>
