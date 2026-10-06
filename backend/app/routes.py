@@ -496,6 +496,175 @@ def approve_task(
         "balance": balance_after / 100,
     }
 
+@router.post("/admin/deposits/{deposit_id}/approve")
+def approve_deposit(
+    deposit_id: int,
+    init_data: str = Header(..., alias="X-Telegram-Init-Data"),
+    db: Session = Depends(get_db),
+):
+    telegram_user = verify_telegram_init_data(init_data)
+
+    if not telegram_user:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid Telegram authentication"
+        )
+
+    admin = db.execute(
+        text("""
+            SELECT id
+            FROM admin_users
+            WHERE telegram_id = :telegram_id
+            AND role = 'super_admin'
+            AND status = 'active'
+            LIMIT 1
+        """),
+        {"telegram_id": int(telegram_user.get("id"))},
+    ).fetchone()
+
+    if not admin:
+        raise HTTPException(
+            status_code=403,
+            detail="Admin access required"
+        )
+
+    deposit = db.execute(
+        text("""
+            SELECT
+                id,
+                user_id,
+                plan_id,
+                amount,
+                transaction_id,
+                status
+            FROM deposits
+            WHERE id = :deposit_id
+            LIMIT 1
+        """),
+        {"deposit_id": deposit_id},
+    ).fetchone()
+
+    if not deposit:
+        raise HTTPException(
+            status_code=404,
+            detail="Deposit not found"
+        )
+
+    if deposit.status != "pending":
+        raise HTTPException(
+            status_code=400,
+            detail="Deposit is not pending"
+        )
+
+    now = datetime.utcnow()
+
+    db.execute(
+        text("""
+            UPDATE deposits
+            SET
+                status = 'approved',
+                verified_at = :verified_at,
+                verified_by = :verified_by
+            WHERE id = :deposit_id
+        """),
+        {
+            "verified_at": now,
+            "verified_by": admin.id,
+            "deposit_id": deposit.id,
+        },
+    )
+
+    db.execute(
+        text("""
+            UPDATE user_plans
+            SET status = 'inactive'
+            WHERE user_id = :user_id
+            AND status = 'active'
+        """),
+        {"user_id": deposit.user_id},
+    )
+
+    db.execute(
+        text("""
+            INSERT INTO user_plans
+            (
+                user_id,
+                plan_id,
+                deposit_id,
+                activated_at,
+                expires_at,
+                status
+            )
+            VALUES
+            (
+                :user_id,
+                :plan_id,
+                :deposit_id,
+                :activated_at,
+                NULL,
+                'active'
+            )
+        """),
+        {
+            "user_id": deposit.user_id,
+            "plan_id": deposit.plan_id,
+            "deposit_id": deposit.id,
+            "activated_at": now,
+        },
+    )
+
+    db.execute(
+        text("""
+            INSERT INTO audit_logs
+            (
+                admin_id,
+                action,
+                entity_type,
+                entity_id,
+                old_value,
+                new_value,
+                created_at
+            )
+            VALUES
+            (
+                :admin_id,
+                'approve_deposit',
+                'deposit',
+                :entity_id,
+                'pending',
+                'approved',
+                :created_at
+            )
+        """),
+        {
+            "admin_id": admin.id,
+            "entity_id": deposit.id,
+            "created_at": now,
+        },
+    )
+
+    db.commit()
+
+    plan = db.execute(
+        text("""
+            SELECT name, daily_task_limit
+            FROM plans
+            WHERE id = :plan_id
+            LIMIT 1
+        """),
+        {"plan_id": deposit.plan_id},
+    ).fetchone()
+
+    return {
+        "success": True,
+        "message": "Deposit approved and plan activated",
+        "deposit_id": deposit.id,
+        "plan": plan.name if plan else None,
+        "daily_task_limit": plan.daily_task_limit if plan else None,
+        "amount": deposit.amount / 100,
+    }
+
+
 @router.get("/admin/deposits/pending")
 def get_pending_deposits(
     init_data: str = Header(..., alias="X-Telegram-Init-Data"),
