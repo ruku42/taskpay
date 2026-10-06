@@ -6,6 +6,7 @@ from telegram.request import HTTPXRequest
 
 
 WEB_APP_URL = "https://taskpay-vs27.onrender.com/app"
+ADMIN_WEB_APP_URL = "https://taskpay-vs27.onrender.com/admin"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -14,6 +15,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton(
                 "🚀 Open TaskPay",
                 web_app=WebAppInfo(url=WEB_APP_URL)
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                "🛡️ Admin Panel",
+                web_app=WebAppInfo(url=ADMIN_WEB_APP_URL)
             )
         ]
     ]
