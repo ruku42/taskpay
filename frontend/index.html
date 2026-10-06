@@ -226,37 +226,15 @@ button{
 
     <h2 class="section-title">📋 আজকের কাজ</h2>
 
-    <div class="task">
-        <div class="task-top">
-            <div>
-                <h3>▶️ YouTube ভিডিও দেখুন</h3>
-                <p>নির্ধারিত YouTube ভিডিও সম্পূর্ণ দেখুন এবং কাজটি যাচাই করুন।</p>
+    <div id="task-list">
+        <div class="task">
+            <div class="task-top">
+                <div>
+                    <h3>⏳ Task লোড হচ্ছে...</h3>
+                    <p>দয়া করে একটু অপেক্ষা করুন।</p>
+                </div>
             </div>
-            <div class="reward">+৳0.50</div>
         </div>
-        <button>🚀 কাজ শুরু করুন</button>
-    </div>
-
-    <div class="task">
-        <div class="task-top">
-            <div>
-                <h3>🔔 YouTube Subscribe</h3>
-                <p>নির্ধারিত YouTube চ্যানেল Subscribe করে কাজটি সম্পন্ন করুন।</p>
-            </div>
-            <div class="reward">+৳0.50</div>
-        </div>
-        <button>🚀 কাজ শুরু করুন</button>
-    </div>
-
-    <div class="task">
-        <div class="task-top">
-            <div>
-                <h3>🔗 Monetag Smart Link</h3>
-                <p>Smart Link ভিজিট করে নির্ধারিত সময়/শর্ত পূরণ করুন।</p>
-            </div>
-            <div class="reward">+৳0.50</div>
-        </div>
-        <button>🚀 কাজ শুরু করুন</button>
     </div>
 
     <h2 class="section-title">💳 Deposit</h2>
@@ -307,5 +285,71 @@ button{
 
 </main>
 
-</body>
+
+<script>
+async function loadTasks() {
+    const list = document.getElementById("task-list");
+
+    try {
+        const response = await fetch("/api/tasks");
+        if (!response.ok) throw new Error("Task API error");
+
+        const tasks = await response.json();
+
+        if (!tasks.length) {
+            list.innerHTML = `
+                <div class="task">
+                    <div class="task-top">
+                        <div>
+                            <h3>📭 এখন কোনো Task নেই</h3>
+                            <p>পরে আবার চেষ্টা করুন।</p>
+                        </div>
+                    </div>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = tasks.map(task => {
+            let icon = "📋";
+            if (task.task_type === "youtube_video") icon = "▶️";
+            if (task.task_type === "youtube_subscribe") icon = "🔔";
+            if (task.task_type === "monetag_smartlink") icon = "🔗";
+
+            return `
+                <div class="task">
+                    <div class="task-top">
+                        <div>
+                            <h3>${icon} ${task.title}</h3>
+                            <p>${task.description || "নির্ধারিত কাজটি সম্পন্ন করুন।"}</p>
+                        </div>
+                        <div class="reward">+৳${Number(task.reward).toFixed(2)}</div>
+                    </div>
+                    <button type="button" onclick="startTask('${task.url}')">
+                        🚀 কাজ শুরু করুন
+                    </button>
+                </div>`;
+        }).join("");
+
+    } catch (error) {
+        list.innerHTML = `
+            <div class="task">
+                <div class="task-top">
+                    <div>
+                        <h3>⚠️ Task লোড করা যায়নি</h3>
+                        <p>ইন্টারনেট connection পরীক্ষা করে আবার চেষ্টা করুন।</p>
+                    </div>
+                </div>
+            </div>`;
+    }
+}
+
+function startTask(url) {
+    if (url) {
+        window.open(url, "_blank");
+    }
+}
+
+loadTasks();
+</script>
+\n</body>
 </html>
