@@ -243,7 +243,7 @@ button{
         <p>📱 Deposit শুধুমাত্র <strong>bKash Personal</strong> এর মাধ্যমে করা যাবে।</p>
         <p>🧾 টাকা পাঠানোর পর Transaction ID এবং Amount জমা দিন।</p>
         <p>⏳ Admin যাচাই করে অনুমোদন করার পরই ব্যালেন্সে টাকা যোগ হবে।</p>
-        <button class="deposit" style="width:100%;margin-top:8px;">
+        <button id="deposit-request-btn" class="deposit" style="width:100%;margin-top:8px;">
             💳 Deposit Request
         </button>
     </div>
@@ -385,6 +385,100 @@ loadTasks();
 </script>
 \n</body>
 </html>
+
+<script>
+const depositButton = document.getElementById("deposit-request-btn");
+
+if (depositButton) {
+    depositButton.addEventListener("click", async () => {
+        const tg = window.Telegram?.WebApp;
+        const initData = tg?.initData;
+
+        if (!initData) {
+            alert("⚠️ Telegram-এর ভিতর থেকে TaskPay খুলুন।");
+            return;
+        }
+
+        const planText = prompt(
+            "💳 Deposit Plan নির্বাচন করুন:\n\n" +
+            "1️⃣ 🥉 Plan 100 — ৳100\n" +
+            "2️⃣ 🥈 Plan 200 — ৳200\n" +
+            "3️⃣ 🥇 Plan 300 — ৳300\n" +
+            "4️⃣ 👑 Premium — ৳400\n\n" +
+            "শুধু 1, 2, 3 অথবা 4 লিখুন:"
+        );
+
+        const plans = {
+            "1": { id: 1, amount: 10000, taka: 100 },
+            "2": { id: 2, amount: 20000, taka: 200 },
+            "3": { id: 3, amount: 30000, taka: 300 },
+            "4": { id: 4, amount: 40000, taka: 400 }
+        };
+
+        const plan = plans[(planText || "").trim()];
+
+        if (!plan) {
+            alert("⚠️ সঠিক Plan নির্বাচন করুন।");
+            return;
+        }
+
+        alert(
+            "📱 bKash Personal নম্বরে টাকা পাঠান:\n\n" +
+            "01319167792\n\n" +
+            "💰 Amount: ৳" + plan.taka + "\n\n" +
+            "তারপর OK চাপুন।"
+        );
+
+        const transactionId = prompt(
+            "🧾 আপনার bKash Transaction ID লিখুন:"
+        );
+
+        if (!transactionId || !transactionId.trim()) {
+            alert("⚠️ Transaction ID না দিলে Deposit Request করা যাবে না।");
+            return;
+        }
+
+        const params = new URLSearchParams({
+            plan_id: String(plan.id),
+            amount: String(plan.amount),
+            transaction_id: transactionId.trim()
+        });
+
+        try {
+            depositButton.disabled = true;
+            depositButton.textContent = "⏳ Submit হচ্ছে...";
+
+            const response = await fetch(`/api/deposit?${params.toString()}`, {
+                method: "POST",
+                headers: {
+                    "X-Telegram-Init-Data": initData
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                alert("⚠️ " + (data.detail || "Deposit submit করা যায়নি।"));
+                return;
+            }
+
+            alert(
+                "✅ Deposit Request সফলভাবে জমা হয়েছে!\n\n" +
+                "💳 Plan: " + data.plan + "\n" +
+                "💰 Amount: ৳" + data.amount + "\n" +
+                "🧾 Transaction ID: " + transactionId.trim() + "\n\n" +
+                "⏳ Admin যাচাই করে approve করার পর Plan চালু হবে।"
+            );
+
+        } catch (error) {
+            alert("⚠️ Deposit submit করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
+        } finally {
+            depositButton.disabled = false;
+            depositButton.textContent = "💳 Deposit Request";
+        }
+    });
+}
+</script>
 
 <script>
 const referralButton = document.getElementById("referral-share-btn");
