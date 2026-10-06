@@ -495,6 +495,117 @@ def approve_task(
         "reward": reward / 100,
         "balance": balance_after / 100,
     }
+
+@router.post("/deposit")
+def create_deposit(
+    plan_id: int,
+    amount: int,
+    transaction_id: str,
+    init_data: str = Header(..., alias="X-Telegram-Init-Data"),
+    db: Session = Depends(get_db),
+):
+    telegram_user = verify_telegram_init_data(init_data)
+
+    if not telegram_user:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid Telegram authentication"
+        )
+
+    user = get_or_create_user(db, telegram_user)
+
+    plan = db.execute(
+        text("""
+            SELECT id, name, deposit_amount, status
+            FROM plans
+            WHERE id = :plan_id
+            AND status = 'active'
+            LIMIT 1
+        """),
+        {"plan_id": plan_id},
+    ).fetchone()
+
+    if not plan:
+        raise HTTPException(
+            status_code=404,
+            detail="Plan not found"
+        )
+
+    if amount != plan.deposit_amount:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid deposit amount"
+        )
+
+    transaction_id = transaction_id.strip()
+
+    if not transaction_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Transaction ID is required"
+        )
+
+    duplicate = db.execute(
+        text("""
+            SELECT id
+            FROM deposits
+            WHERE transaction_id = :transaction_id
+            LIMIT 1
+        """),
+        {"transaction_id": transaction_id},
+    ).fetchone()
+
+    if duplicate:
+        raise HTTPException(
+            status_code=400,
+            detail="Transaction ID already submitted"
+        )
+
+    now = datetime.utcnow()
+
+    db.execute(
+        text("""
+            INSERT INTO deposits
+            (
+                user_id,
+                plan_id,
+                payment_method,
+                amount,
+                transaction_id,
+                status,
+                submitted_at
+            )
+            VALUES
+            (
+                :user_id,
+                :plan_id,
+                'bkash',
+                :amount,
+                :transaction_id,
+                'pending',
+                :submitted_at
+            )
+        """),
+        {
+            "user_id": user.id,
+            "plan_id": plan.id,
+            "amount": amount,
+            "transaction_id": transaction_id,
+            "submitted_at": now,
+        },
+    )
+
+    db.commit()
+
+    return {
+        "success": True,
+        "message": "Deposit submitted successfully",
+        "status": "pending",
+        "plan": plan.name,
+        "amount": amount / 100,
+        "payment_method": "bkash",
+    }
+
 @router.post("/referral")
 def create_referral(
     referral_code: str,
