@@ -1,7 +1,4 @@
 fastapi
-uvicorn[standard]
-sqlalchemy
-psycopg[binary]
-alembic
-
+uvicorn
 python-telegram-bot
+sqlalchemy
