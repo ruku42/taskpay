@@ -260,3 +260,125 @@ def complete_task(
         "reward": task.reward_amount,
         "balance": balance_before / 100,
     }
+
+@router.post("/admin/tasks/{completion_id}/approve")
+def approve_task(
+    completion_id: int,
+    init_data: str = Header(..., alias="X-Telegram-Init-Data"),
+    db: Session = Depends(get_db),
+):
+    telegram_user = verify_telegram_init_data(init_data)
+
+    if not telegram_user:
+        raise HTTPException(status_code=401, detail="Invalid Telegram authentication")
+
+    admin = db.execute(
+        text("""
+            SELECT id
+            FROM admin_users
+            WHERE telegram_id = :telegram_id
+            AND role = 'super_admin'
+            AND status = 'active'
+            LIMIT 1
+        """),
+        {"telegram_id": int(telegram_user.get("id"))},
+    ).fetchone()
+
+    if not admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    completion = db.query(TaskCompletion).filter(
+        TaskCompletion.id == completion_id
+    ).first()
+
+    if not completion:
+        raise HTTPException(status_code=404, detail="Task completion not found")
+
+    if completion.verification_status != "pending":
+        raise HTTPException(status_code=400, detail="Task is not pending")
+
+    balance_before = get_balance(db, completion.user_id)
+    reward = int(round(float(completion.reward_amount)))
+
+    completion.verification_status = "verified"
+    completion.verified_at = datetime.utcnow()
+    completion.rejection_reason = None
+
+    balance_after = balance_before + reward
+
+    db.execute(
+        text("""
+            INSERT INTO transactions
+            (
+                user_id,
+                type,
+                amount,
+                reference_type,
+                reference_id,
+                balance_before,
+                balance_after,
+                description,
+                created_at
+            )
+            VALUES
+            (
+                :user_id,
+                'task_reward',
+                :amount,
+                'task_completion',
+                :reference_id,
+                :balance_before,
+                :balance_after,
+                :description,
+                :created_at
+            )
+        """),
+        {
+            "user_id": completion.user_id,
+            "amount": reward,
+            "reference_id": completion.id,
+            "balance_before": balance_before,
+            "balance_after": balance_after,
+            "description": f"Task #{completion.task_id} reward approved",
+            "created_at": datetime.utcnow(),
+        },
+    )
+
+    db.execute(
+        text("""
+            INSERT INTO audit_logs
+            (
+                admin_id,
+                action,
+                entity_type,
+                entity_id,
+                old_value,
+                new_value,
+                created_at
+            )
+            VALUES
+            (
+                :admin_id,
+                'approve_task',
+                'task_completion',
+                :entity_id,
+                'pending',
+                'verified',
+                :created_at
+            )
+        """),
+        {
+            "admin_id": admin.id,
+            "entity_id": completion.id,
+            "created_at": datetime.utcnow(),
+        },
+    )
+
+    db.commit()
+
+    return {
+        "success": True,
+        "message": "Task approved",
+        "reward": reward / 100,
+        "balance": balance_after / 100,
+    }
