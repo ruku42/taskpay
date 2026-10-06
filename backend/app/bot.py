@@ -2,6 +2,7 @@ import os
 
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
+from telegram.request import HTTPXRequest
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -17,7 +18,14 @@ def create_bot():
     if not token:
         raise RuntimeError("TELEGRAM_BOT_TOKEN is not set")
 
-    app = Application.builder().token(token).build()
+    request = HTTPXRequest(
+        connect_timeout=30,
+        read_timeout=30,
+        write_timeout=30,
+        pool_timeout=30,
+    )
+
+    app = Application.builder().token(token).request(request).build()
     app.add_handler(CommandHandler("start", start))
 
     return app
