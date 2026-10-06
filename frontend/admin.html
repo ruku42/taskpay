@@ -59,7 +59,7 @@ async function loadDeposits() {
             }
         });
 
-        const debugResponse = await fetch("/api/admin/debug", {headers:{"X-Telegram-Init-Data":initData}}); const debugData = await debugResponse.json(); console.log("ADMIN DEBUG:", debugData);
+        
 
         if (!response.ok) {
             throw new Error(data.detail || "Admin access পাওয়া যায়নি।");
