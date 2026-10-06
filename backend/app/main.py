@@ -19,3 +19,6 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+from app.bot import create_bot
+
+telegram_bot = create_bot()
