@@ -324,7 +324,7 @@ async function loadTasks() {
                         </div>
                         <div class="reward">+৳${Number(task.reward).toFixed(2)}</div>
                     </div>
-                    <button type="button" onclick="startTask('${task.url}')">
+                    <button type="button" onclick="startTask(${task.id}, '${task.url}')">
                         🚀 কাজ শুরু করুন
                     </button>
                 </div>`;
@@ -343,9 +343,41 @@ async function loadTasks() {
     }
 }
 
-function startTask(url) {
-    if (url) {
-        window.open(url, "_blank");
+async function startTask(taskId, url) {
+    if (!taskId || !url) return;
+
+    const tg = window.Telegram?.WebApp;
+    const initData = tg?.initData;
+
+    if (!initData) {
+        alert("⚠️ Telegram-এর ভিতর থেকে TaskPay খুলুন।");
+        return;
+    }
+
+    window.open(url, "_blank");
+
+    try {
+        const response = await fetch(`/api/tasks/${taskId}/complete`, {
+            method: "POST",
+            headers: {
+                "X-Telegram-Init-Data": initData
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(`⚠️ ${data.detail || "Task submit করা যায়নি।"}`);
+            return;
+        }
+
+        alert(
+            "✅ Task submit হয়েছে।\n\n" +
+            "⏳ Verification-এর পর ৳0.50 আপনার Balance-এ যোগ হবে।"
+        );
+
+    } catch (error) {
+        alert("⚠️ Task submit করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
     }
 }
 
