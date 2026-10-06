@@ -9,6 +9,7 @@ from telegram import Update
 from app.bot import create_bot
 from app.routes import router
 from app.database import Base, engine
+from app.seed_tasks import seed_tasks
 
 
 WEB_APP_FILE = Path(__file__).resolve().parents[2] / "frontend" / "index.html"
@@ -16,8 +17,9 @@ WEB_APP_FILE = Path(__file__).resolve().parents[2] / "frontend" / "index.html"
 
 @asynccontextmanager
 async def lifespan(app):
-    # Create database tables if they do not exist
     Base.metadata.create_all(bind=engine)
+
+    seed_tasks()
 
     telegram_bot = create_bot()
 
