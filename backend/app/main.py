@@ -1,5 +1,6 @@
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
@@ -8,7 +9,7 @@ from telegram import Update
 from app.bot import create_bot
 
 
-WEB_APP_FILE = "/opt/render/project/src/frontend/index.html"
+WEB_APP_FILE = Path(__file__).resolve().parents[2] / "frontend" / "index.html"
 
 
 @asynccontextmanager
