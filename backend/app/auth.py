@@ -25,8 +25,8 @@ def verify_telegram_init_data(init_data: str):
         )
 
         secret_key = hmac.new(
-            b"WebAppData",
             bot_token.encode(),
+            b"WebAppData",
             hashlib.sha256
         ).digest()
 
