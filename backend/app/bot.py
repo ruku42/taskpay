@@ -5,7 +5,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes
 from telegram.request import HTTPXRequest
 
 
-WEB_APP_URL = "https://taskpay-vs27.onrender.com"
+WEB_APP_URL = "https://taskpay-vs27.onrender.com/app"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
