@@ -34,7 +34,7 @@ class Task(Base):
     task_type = Column(String, nullable=False)
     destination_url = Column(String, nullable=False)
 
-    reward_amount = Column(Float, default=0.50)
+    reward_amount = Column(Integer, default=50)
 
     daily_limit = Column(Integer, default=1)
     cooldown_seconds = Column(Integer, default=0)
@@ -63,7 +63,7 @@ class TaskCompletion(Base):
     task_id = Column(Integer, nullable=False)
     user_id = Column(Integer, nullable=False)
 
-    reward_amount = Column(Float, default=0.50)
+    reward_amount = Column(Integer, default=50)
 
     verification_status = Column(String, nullable=False)
     verified_at = Column(DateTime, nullable=True)
