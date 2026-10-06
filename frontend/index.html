@@ -267,7 +267,7 @@ button{
             Referrer এবং নতুন সদস্য উভয়েই ৳5 Reward পাবেন।
             প্রথম Withdraw-এর আগে ৫টি Valid Referral প্রয়োজন।
         </p>
-        <button id="referral-share-btn">🔗 Referral Link শেয়ার করুন</button><p id="referral-link-display" style="word-break:break-all;margin-top:10px;"></p>
+        <button id="referral-share-btn">🔗 Referral Link শেয়ার করুন</button>
     </div>
 
     <h2 class="section-title">🛡️ নিরাপত্তা</h2>
@@ -356,21 +356,6 @@ loadTasks();
 
 <script>
 const referralButton = document.getElementById("referral-share-btn");
-const referralDisplay = document.getElementById("referral-link-display");
-
-if (referralDisplay) {
-    const tg = window.Telegram?.WebApp;
-    const telegramUser = tg?.initDataUnsafe?.user;
-
-    if (telegramUser?.id) {
-        const referralCode = `TP${telegramUser.id}`;
-        referralDisplay.textContent =
-            `🔗 আপনার Referral Link: https://t.me/TaskPayOfficialBD_bot?start=${referralCode}`;
-    } else {
-        referralDisplay.textContent =
-            "⚠️ Telegram user তথ্য পাওয়া যাচ্ছে না। Telegram-এর ভিতর থেকে Mini App খুলুন।";
-    }
-}
 
 if (referralButton) {
     referralButton.addEventListener("click", () => {
@@ -378,17 +363,22 @@ if (referralButton) {
         const telegramUser = tg?.initDataUnsafe?.user;
 
         if (!telegramUser?.id) {
-            alert("⚠️ Telegram থেকে Mini App খুলুন।");
+            alert("⚠️ Telegram-এর ভিতর থেকে TaskPay খুলুন।");
             return;
         }
 
         const referralCode = `TP${telegramUser.id}`;
-        const referralLink = `https://t.me/TaskPayOfficialBD_bot?start=${referralCode}`;
+        const referralLink =
+            `https://t.me/TaskPayOfficialBD_bot?start=${referralCode}`;
+
+        const shareUrl =
+            `https://t.me/share/url?url=${encodeURIComponent(referralLink)}` +
+            `&text=${encodeURIComponent("🎉 TaskPay-এ কাজ করে রিওয়ার্ড আয় করুন! 🚀")}`;
 
         if (tg?.openTelegramLink) {
-            tg.openTelegramLink(referralLink);
+            tg.openTelegramLink(shareUrl);
         } else {
-            window.open(referralLink, "_blank");
+            window.open(shareUrl, "_blank");
         }
     });
 }
