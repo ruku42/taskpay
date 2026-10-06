@@ -41,7 +41,7 @@ const messageBox = document.getElementById("message");
 const refreshButton = document.getElementById("refresh-btn");
 
 async function loadDeposits() {
-    const initData = tg?.initData;
+    const initData = tg?.initData; const debugUserId = tg?.initDataUnsafe?.user?.id; console.log("TaskPay Admin Telegram ID:", debugUserId);
 
     if (!initData) {
         messageBox.innerHTML =
