@@ -1,14 +1,30 @@
 import os
 
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import Application, CommandHandler, ContextTypes
 from telegram.request import HTTPXRequest
 
 
+WEB_APP_URL = "https://taskpay-vs27.onrender.com"
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                "🚀 Open TaskPay",
+                web_app=WebAppInfo(url=WEB_APP_URL)
+            )
+        ]
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
     await update.message.reply_text(
         "🎉 Welcome to TaskPay!\n\n"
-        "TaskPay bot is now online. ✅"
+        "💰 Earn rewards by completing tasks.\n"
+        "👇 Tap the button below to open TaskPay.",
+        reply_markup=reply_markup
     )
 
 
@@ -26,6 +42,7 @@ def create_bot():
     )
 
     app = Application.builder().token(token).request(request).build()
+
     app.add_handler(CommandHandler("start", start))
 
     return app
