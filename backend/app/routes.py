@@ -496,6 +496,79 @@ def approve_task(
         "balance": balance_after / 100,
     }
 
+@router.get("/admin/deposits/pending")
+def get_pending_deposits(
+    init_data: str = Header(..., alias="X-Telegram-Init-Data"),
+    db: Session = Depends(get_db),
+):
+    telegram_user = verify_telegram_init_data(init_data)
+
+    if not telegram_user:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid Telegram authentication"
+        )
+
+    admin = db.execute(
+        text("""
+            SELECT id
+            FROM admin_users
+            WHERE telegram_id = :telegram_id
+            AND role = 'super_admin'
+            AND status = 'active'
+            LIMIT 1
+        """),
+        {"telegram_id": int(telegram_user.get("id"))},
+    ).fetchone()
+
+    if not admin:
+        raise HTTPException(
+            status_code=403,
+            detail="Admin access required"
+        )
+
+    rows = db.execute(
+        text("""
+            SELECT
+                d.id,
+                d.user_id,
+                u.telegram_id,
+                u.username,
+                u.first_name,
+                d.plan_id,
+                p.name AS plan_name,
+                d.payment_method,
+                d.amount,
+                d.transaction_id,
+                d.status,
+                d.submitted_at
+            FROM deposits d
+            JOIN users u ON u.id = d.user_id
+            JOIN plans p ON p.id = d.plan_id
+            WHERE d.status = 'pending'
+            ORDER BY d.submitted_at ASC
+        """)
+    ).fetchall()
+
+    return [
+        {
+            "deposit_id": row.id,
+            "user_id": row.user_id,
+            "telegram_id": row.telegram_id,
+            "username": row.username,
+            "first_name": row.first_name,
+            "plan_id": row.plan_id,
+            "plan": row.plan_name,
+            "payment_method": row.payment_method,
+            "amount": row.amount / 100,
+            "transaction_id": row.transaction_id,
+            "status": row.status,
+            "submitted_at": row.submitted_at.isoformat(),
+        }
+        for row in rows
+    ]
+
+
 @router.post("/deposit")
 def create_deposit(
     plan_id: int,
