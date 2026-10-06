@@ -1,125 +1,311 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskPay</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskPay</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
-            color: #222;
-        }
-
-        .header {
-            background: #111827;
-            color: white;
-            padding: 24px 20px;
-            border-radius: 0 0 24px 24px;
-        }
-
-        .header h1 {
-            margin: 0 0 6px;
-            font-size: 26px;
-        }
-
-        .header p {
-            margin: 0;
-            opacity: 0.8;
-        }
-
-        .balance {
-            margin: 20px;
-            padding: 22px;
-            background: white;
-            border-radius: 18px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-        }
-
-        .balance-title {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .balance-amount {
-            margin-top: 8px;
-            font-size: 32px;
-            font-weight: bold;
-        }
-
-        .tasks {
-            padding: 0 20px 30px;
-        }
-
-        .tasks h2 {
-            font-size: 20px;
-        }
-
-        .task {
-            background: white;
-            padding: 18px;
-            margin-bottom: 14px;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-
-        .task h3 {
-            margin: 0 0 8px;
-        }
-
-        .task p {
-            margin: 0 0 14px;
-            color: #666;
-        }
-
-        .reward {
-            font-weight: bold;
-            margin-bottom: 12px;
-        }
-
-        button {
-            width: 100%;
-            padding: 13px;
-            border: none;
-            border-radius: 12px;
-            background: #2563eb;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-        }
-    </style>
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Arial,"Noto Sans Bengali",sans-serif;
+    background:#f3f6fa;
+    color:#172033;
+}
+.header{
+    background:linear-gradient(135deg,#0f766e,#2563eb);
+    color:white;
+    padding:22px 18px 24px;
+    border-radius:0 0 25px 25px;
+}
+.brand{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+.brand h1{margin:0;font-size:26px}
+.profile{
+    background:rgba(255,255,255,.18);
+    padding:9px 12px;
+    border-radius:14px;
+}
+.notice{
+    margin-top:18px;
+    background:rgba(255,255,255,.14);
+    border-radius:13px;
+    padding:11px;
+    overflow:hidden;
+}
+.notice-track{
+    white-space:nowrap;
+    display:inline-block;
+    animation:move 16s linear infinite;
+}
+@keyframes move{
+    from{transform:translateX(100%)}
+    to{transform:translateX(-100%)}
+}
+.container{
+    padding:16px;
+    max-width:650px;
+    margin:auto;
+}
+.balance{
+    margin-top:-4px;
+    background:white;
+    padding:20px;
+    border-radius:20px;
+    box-shadow:0 5px 18px rgba(0,0,0,.07);
+}
+.balance-title{
+    color:#667085;
+    font-size:14px;
+}
+.balance-amount{
+    font-size:34px;
+    font-weight:800;
+    margin:7px 0 16px;
+}
+.stats{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+.stat{
+    background:#f5f7fa;
+    padding:12px;
+    border-radius:14px;
+}
+.stat small{
+    color:#667085;
+}
+.stat strong{
+    display:block;
+    margin-top:4px;
+}
+.actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:14px;
+}
+button{
+    border:0;
+    border-radius:13px;
+    padding:13px;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+}
+.deposit{background:#e0f2fe;color:#075985}
+.withdraw{background:#dcfce7;color:#166534}
+.section-title{
+    margin:25px 0 12px;
+    font-size:21px;
+}
+.task{
+    background:white;
+    border-radius:18px;
+    padding:17px;
+    margin-bottom:12px;
+    box-shadow:0 4px 14px rgba(0,0,0,.05);
+}
+.task-top{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+}
+.task h3{
+    margin:0 0 6px;
+    font-size:17px;
+}
+.task p{
+    margin:0;
+    color:#667085;
+    font-size:14px;
+    line-height:1.5;
+}
+.reward{
+    white-space:nowrap;
+    background:#fff7ed;
+    color:#c2410c;
+    height:max-content;
+    padding:6px 9px;
+    border-radius:10px;
+    font-weight:800;
+    font-size:13px;
+}
+.task button{
+    width:100%;
+    margin-top:14px;
+    background:#2563eb;
+    color:white;
+}
+.info{
+    background:white;
+    border-radius:18px;
+    padding:17px;
+    margin-top:12px;
+    box-shadow:0 4px 14px rgba(0,0,0,.05);
+}
+.info p{
+    margin:8px 0;
+    color:#475467;
+    font-size:14px;
+    line-height:1.5;
+}
+.referral{
+    background:linear-gradient(135deg,#7c3aed,#4f46e5);
+    color:white;
+    border-radius:20px;
+    padding:19px;
+    margin-top:14px;
+}
+.referral h3{margin:0 0 8px}
+.referral p{
+    margin:0;
+    line-height:1.5;
+    font-size:14px;
+    opacity:.92;
+}
+.referral button{
+    width:100%;
+    margin-top:14px;
+    background:white;
+    color:#4f46e5;
+}
+.footer{
+    text-align:center;
+    color:#98a2b3;
+    font-size:12px;
+    padding:25px 0 12px;
+}
+</style>
 </head>
 
 <body>
 
-    <div class="header">
+<header class="header">
+    <div class="brand">
         <h1>🚀 TaskPay</h1>
-        <p>Complete tasks and earn rewards.</p>
+        <div class="profile">👤 সদস্য</div>
     </div>
 
-    <div class="balance">
-        <div class="balance-title">Your Balance</div>
-        <div class="balance-amount">৳0.00</div>
-    </div>
-
-    <div class="tasks">
-        <h2>📋 Available Tasks</h2>
-
-        <div class="task">
-            <h3>Example Task</h3>
-            <p>Complete this task and earn your reward.</p>
-
-            <div class="reward">💰 Reward: ৳10</div>
-
-            <button>Start Task</button>
+    <div class="notice">
+        <div class="notice-track">
+            📢 স্বাগতম TaskPay-এ • কাজ সম্পন্ন করুন এবং রিওয়ার্ড পান •
+            💳 Deposit শুধু bKash Personal • 💸 Withdraw minimum ৳10 •
+            👥 প্রথম Withdraw-এর আগে ৫টি Valid Referral প্রয়োজন
         </div>
     </div>
+</header>
+
+<main class="container">
+
+    <section class="balance">
+        <div class="balance-title">💰 আপনার ব্যালেন্স</div>
+        <div class="balance-amount">৳0.00</div>
+
+        <div class="stats">
+            <div class="stat">
+                <small>📋 সম্পন্ন কাজ</small>
+                <strong>0</strong>
+            </div>
+            <div class="stat">
+                <small>👥 Valid Referral</small>
+                <strong>0 / 5</strong>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="deposit">💳 Deposit</button>
+            <button class="withdraw">💸 Withdraw</button>
+        </div>
+    </section>
+
+    <h2 class="section-title">📋 আজকের কাজ</h2>
+
+    <div class="task">
+        <div class="task-top">
+            <div>
+                <h3>▶️ YouTube ভিডিও দেখুন</h3>
+                <p>নির্ধারিত YouTube ভিডিও সম্পূর্ণ দেখুন এবং কাজটি যাচাই করুন।</p>
+            </div>
+            <div class="reward">+৳0.50</div>
+        </div>
+        <button>🚀 কাজ শুরু করুন</button>
+    </div>
+
+    <div class="task">
+        <div class="task-top">
+            <div>
+                <h3>🔔 YouTube Subscribe</h3>
+                <p>নির্ধারিত YouTube চ্যানেল Subscribe করে কাজটি সম্পন্ন করুন।</p>
+            </div>
+            <div class="reward">+৳0.50</div>
+        </div>
+        <button>🚀 কাজ শুরু করুন</button>
+    </div>
+
+    <div class="task">
+        <div class="task-top">
+            <div>
+                <h3>🔗 Monetag Smart Link</h3>
+                <p>Smart Link ভিজিট করে নির্ধারিত সময়/শর্ত পূরণ করুন।</p>
+            </div>
+            <div class="reward">+৳0.50</div>
+        </div>
+        <button>🚀 কাজ শুরু করুন</button>
+    </div>
+
+    <h2 class="section-title">💳 Deposit</h2>
+
+    <div class="info">
+        <p>📱 Deposit শুধুমাত্র <strong>bKash Personal</strong> এর মাধ্যমে করা যাবে।</p>
+        <p>🧾 টাকা পাঠানোর পর Transaction ID এবং Amount জমা দিন।</p>
+        <p>⏳ Admin যাচাই করে অনুমোদন করার পরই ব্যালেন্সে টাকা যোগ হবে।</p>
+        <button class="deposit" style="width:100%;margin-top:8px;">
+            💳 Deposit Request
+        </button>
+    </div>
+
+    <h2 class="section-title">💸 Withdraw</h2>
+
+    <div class="info">
+        <p>💰 Minimum Withdraw: <strong>৳10</strong></p>
+        <p>🟢 bKash — Available</p>
+        <p>🟠 Nagad — Coming Soon</p>
+        <p>🛡️ সন্দেহজনক বা ডুপ্লিকেট Withdraw Admin যাচাই করে বাতিল করতে পারে।</p>
+        <button class="withdraw" style="width:100%;margin-top:8px;">
+            💸 Withdraw Request
+        </button>
+    </div>
+
+    <div class="referral">
+        <h3>👥 Referral Program</h3>
+        <p>
+            আপনার Referral Link দিয়ে নতুন সদস্য আনুন।
+            Referrer এবং নতুন সদস্য উভয়েই ৳5 Reward পাবেন।
+            প্রথম Withdraw-এর আগে ৫টি Valid Referral প্রয়োজন।
+        </p>
+        <button>🔗 Referral Link শেয়ার করুন</button>
+    </div>
+
+    <h2 class="section-title">🛡️ নিরাপত্তা</h2>
+
+    <div class="info">
+        <p>✅ একই কাজ একাধিকবার Reward পাওয়া যাবে না।</p>
+        <p>✅ Self-referral গ্রহণযোগ্য নয়।</p>
+        <p>✅ Fake বা সন্দেহজনক Referral/Task Activity যাচাই করা হবে।</p>
+        <p>✅ সব Earnings ও Transaction Server-এ রেকর্ড থাকবে।</p>
+    </div>
+
+    <div class="footer">
+        🚀 TaskPay • কাজ করুন, আয় করুন
+    </div>
+
+</main>
 
 </body>
 </html>
