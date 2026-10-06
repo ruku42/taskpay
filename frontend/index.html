@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskPay</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 24px 20px;
+            border-radius: 0 0 24px 24px;
+        }
+
+        .header h1 {
+            margin: 0 0 6px;
+            font-size: 26px;
+        }
+
+        .header p {
+            margin: 0;
+            opacity: 0.8;
+        }
+
+        .balance {
+            margin: 20px;
+            padding: 22px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        .balance-title {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .balance-amount {
+            margin-top: 8px;
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .tasks {
+            padding: 0 20px 30px;
+        }
+
+        .tasks h2 {
+            font-size: 20px;
+        }
+
+        .task {
+            background: white;
+            padding: 18px;
+            margin-bottom: 14px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .task h3 {
+            margin: 0 0 8px;
+        }
+
+        .task p {
+            margin: 0 0 14px;
+            color: #666;
+        }
+
+        .reward {
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 12px;
+            background: #2563eb;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>🚀 TaskPay</h1>
+        <p>Complete tasks and earn rewards.</p>
+    </div>
+
+    <div class="balance">
+        <div class="balance-title">Your Balance</div>
+        <div class="balance-amount">৳0.00</div>
+    </div>
+
+    <div class="tasks">
+        <h2>📋 Available Tasks</h2>
+
+        <div class="task">
+            <h3>Example Task</h3>
+            <p>Complete this task and earn your reward.</p>
+
+            <div class="reward">💰 Reward: ৳10</div>
+
+            <button>Start Task</button>
+        </div>
+    </div>
+
+</body>
+</html>
