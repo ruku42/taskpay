@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import secrets
 from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -198,7 +199,45 @@ def complete_task(
 
     reward_paisa = int(task.reward_amount)
 
+    now = datetime.utcnow()
+    session_token = secrets.token_urlsafe(32)
+    session_expires_at = now + timedelta(minutes=30)
+
+    session_row = db.execute(
+        text("""
+            INSERT INTO task_sessions
+            (
+                task_id,
+                user_id,
+                session_token,
+                started_at,
+                expires_at,
+                status
+            )
+            VALUES
+            (
+                :task_id,
+                :user_id,
+                :session_token,
+                :started_at,
+                :expires_at,
+                'active'
+            )
+            RETURNING id
+        """),
+        {
+            "task_id": task.id,
+            "user_id": user.id,
+            "session_token": session_token,
+            "started_at": now,
+            "expires_at": session_expires_at,
+        },
+    ).fetchone()
+
+    session_id = session_row[0]
+
     completion = TaskCompletion(
+        session_id=session_id,
         user_id=user.id,
         task_id=task.id,
         reward_amount=reward_paisa,
