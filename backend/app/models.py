@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime
+from sqlalchemy import Column, Integer, BigInteger, String, Float, Boolean, DateTime
 from datetime import datetime
 
 from app.database import Base
@@ -8,29 +8,50 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    telegram_id = Column(String, unique=True, index=True, nullable=False)
+    telegram_id = Column(BigInteger, unique=True, index=True, nullable=False)
 
-    balance = Column(Float, default=0.0)
-    referral_count = Column(Integer, default=0)
-    valid_referrals = Column(Integer, default=0)
+    username = Column(String(255), nullable=True)
+    first_name = Column(String(255), nullable=True)
+    last_name = Column(String(255), nullable=True)
 
-    is_active = Column(Boolean, default=True)
+    status = Column(String(20), nullable=False)
+    is_channel_verified = Column(Boolean, nullable=False)
+    welcome_bonus_claimed = Column(Boolean, nullable=False)
 
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
+    last_seen_at = Column(DateTime, nullable=True)
 
 
 class Task(Base):
     __tablename__ = "tasks"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, nullable=False)
-    task_type = Column(String, nullable=False)
-    url = Column(String, nullable=False)
 
-    reward = Column(Float, default=0.50)
-    is_active = Column(Boolean, default=True)
+    title = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+
+    task_type = Column(String, nullable=False)
+    destination_url = Column(String, nullable=False)
+
+    reward_amount = Column(Float, default=0.50)
+
+    daily_limit = Column(Integer, default=1)
+    cooldown_seconds = Column(Integer, default=0)
+
+    verification_type = Column(String, default="manual")
+
+    status = Column(String, default="active")
+
+    start_at = Column(DateTime, nullable=True)
+    end_at = Column(DateTime, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
 
 
 class TaskCompletion(Base):
@@ -38,59 +59,14 @@ class TaskCompletion(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    user_id = Column(Integer, nullable=False)
+    session_id = Column(Integer, nullable=True)
     task_id = Column(Integer, nullable=False)
-
-    reward = Column(Float, default=0.50)
-
-    completed_at = Column(DateTime, default=datetime.utcnow)
-
-
-class Deposit(Base):
-    __tablename__ = "deposits"
-
-    id = Column(Integer, primary_key=True, index=True)
-
     user_id = Column(Integer, nullable=False)
 
-    amount = Column(Float, nullable=False)
-    transaction_id = Column(String, nullable=False)
+    reward_amount = Column(Float, default=0.50)
 
-    status = Column(String, default="pending")
+    verification_status = Column(String, nullable=False)
+    verified_at = Column(DateTime, nullable=True)
+    rejection_reason = Column(String, nullable=True)
 
-    created_at = Column(DateTime, default=datetime.utcnow)
-    approved_at = Column(DateTime, nullable=True)
-
-
-class Withdrawal(Base):
-    __tablename__ = "withdrawals"
-
-    id = Column(Integer, primary_key=True, index=True)
-
-    user_id = Column(Integer, nullable=False)
-
-    amount = Column(Float, nullable=False)
-    method = Column(String, default="bkash")
-    account_number = Column(String, nullable=False)
-
-    status = Column(String, default="pending")
-
-    created_at = Column(DateTime, default=datetime.utcnow)
-    processed_at = Column(DateTime, nullable=True)
-
-
-class Referral(Base):
-    __tablename__ = "referrals"
-
-    id = Column(Integer, primary_key=True, index=True)
-
-    referrer_id = Column(Integer, nullable=False)
-    referred_user_id = Column(Integer, nullable=False)
-
-    referrer_bonus = Column(Float, default=5.0)
-    referred_bonus = Column(Float, default=5.0)
-
-    status = Column(String, default="pending")
-
-    created_at = Column(DateTime, default=datetime.utcnow)
-    approved_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=False)
