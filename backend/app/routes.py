@@ -665,6 +665,13 @@ def approve_deposit(
     }
 
 
+@router.get("/admin/debug")
+def admin_debug(init_data: str = Header(..., alias="X-Telegram-Init-Data")):
+    telegram_user = verify_telegram_init_data(init_data)
+    if not telegram_user:
+        return {"verified": False, "telegram_id": None}
+    return {"verified": True, "telegram_id": int(telegram_user.get("id"))}
+
 @router.get("/admin/deposits/pending")
 def get_pending_deposits(
     init_data: str = Header(..., alias="X-Telegram-Init-Data"),
