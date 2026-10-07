@@ -61,6 +61,8 @@ async function loadDeposits() {
 
         
 
+        const data = await response.json();
+
         if (!response.ok) {
             throw new Error(data.detail || "Admin access পাওয়া যায়নি।");
         }
@@ -123,6 +125,8 @@ async function approveDeposit(depositId) {
                 }
             }
         );
+
+        const data = await response.json();
 
         const data = await response.json();
 
