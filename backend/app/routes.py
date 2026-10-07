@@ -960,3 +960,9 @@ def create_referral(
         "message": "Referral registered successfully",
         "status": "pending"
     }
+
+
+@router.get("/admin/debug-db")
+def admin_debug_db(db: Session = Depends(get_db)):
+    rows = db.execute(text("SELECT role, status FROM admin_users ORDER BY id")).fetchall()
+    return {"admin_count": len(rows), "admins": [{"role": r[0], "status": r[1]} for r in rows]}
