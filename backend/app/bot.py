@@ -1,8 +1,12 @@
 import os
+from datetime import datetime
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import Application, CommandHandler, ContextTypes
 from telegram.request import HTTPXRequest
+
+from app.database import get_db
+from app.models.users import User
 
 
 WEB_APP_URL = "https://taskpay-vs27.onrender.com/app"
@@ -10,6 +14,41 @@ ADMIN_WEB_APP_URL = "https://taskpay-vs27.onrender.com/admin"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    telegram_user = update.effective_user
+
+    if not telegram_user:
+        return
+
+    db = next(get_db())
+
+    try:
+        user = db.query(User).filter(
+            User.telegram_id == telegram_user.id
+        ).first()
+
+        if not user:
+            user = User(
+                telegram_id=telegram_user.id,
+                username=telegram_user.username,
+                first_name=telegram_user.first_name,
+                last_name=telegram_user.last_name,
+                status="active",
+                last_seen_at=datetime.utcnow(),
+            )
+
+            db.add(user)
+
+        else:
+            user.username = telegram_user.username
+            user.first_name = telegram_user.first_name
+            user.last_name = telegram_user.last_name
+            user.last_seen_at = datetime.utcnow()
+
+        db.commit()
+
+    finally:
+        db.close()
+
     keyboard = [
         [
             InlineKeyboardButton(
