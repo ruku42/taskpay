@@ -381,7 +381,30 @@ async function startTask(taskId, url) {
         alert("⚠️ Task submit করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
     }
 }
+<button type="button" onclick="watchRewardedAd()">
+    🎁 বিজ্ঞাপন দেখে Reward নিন
+</button>
 
+<script>
+async function watchRewardedAd() {
+    if (typeof show_11984290 !== "function") {
+        alert("⚠️ Rewarded Ad এখনো প্রস্তুত নয়। কিছুক্ষণ পরে চেষ্টা করুন।");
+        return;
+    }
+
+    try {
+        await show_11984290();
+
+        alert(
+            "✅ বিজ্ঞাপন সম্পন্ন হয়েছে!\n\n" +
+            "Reward verification চালু হওয়ার পর আপনার reward balance-এ যোগ হবে।"
+        );
+
+    } catch (error) {
+        alert("⚠️ বিজ্ঞাপন সম্পন্ন করা যায়নি। আবার চেষ্টা করুন।");
+    }
+}
+</script>
 loadTasks();
 </script>
 \n</body>
