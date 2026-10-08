@@ -381,9 +381,16 @@ async function startTask(taskId, url) {
         alert("⚠️ Task submit করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
     }
 }
-<button type="button" onclick="watchRewardedAd()">
-    🎁 বিজ্ঞাপন দেখে Reward নিন
-</button>
+loadTasks();
+</script>
+
+<div style="margin:20px 0;text-align:center;">
+    <button type="button"
+        onclick="watchRewardedAd()"
+        style="width:100%;padding:16px;border:0;border-radius:14px;background:#16a34a;color:white;font-size:17px;font-weight:bold;">
+        🎁 বিজ্ঞাপন দেখে Reward নিন
+    </button>
+</div>
 
 <script>
 async function watchRewardedAd() {
@@ -405,9 +412,8 @@ async function watchRewardedAd() {
     }
 }
 </script>
-loadTasks();
-</script>
-\n</body>
+
+</body>
 </html>
 
 <script>
