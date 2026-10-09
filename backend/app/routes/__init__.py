@@ -11,3 +11,6 @@ router.include_router(tasks_router)
 router.include_router(wallet_router)
 router.include_router(deposits_router)
 router.include_router(adsgram_router)
+
+from app.routes.legacy_api import router as legacy_api_router
+router.include_router(legacy_api_router)
