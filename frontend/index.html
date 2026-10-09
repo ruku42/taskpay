@@ -292,7 +292,7 @@ async function loadTasks() {
     const list = document.getElementById("task-list");
 
     try {
-        const response = await fetch("/api/tasks");
+        const response = await fetch("/tasks");
         if (!response.ok) throw new Error("Task API error");
 
         const tasks = await response.json();
