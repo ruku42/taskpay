@@ -358,7 +358,7 @@ async function startTask(taskId, url) {
     window.open(url, "_blank");
 
     try {
-        const response = await fetch(`/api/tasks/${taskId}/complete`, {
+        const response = await fetch(`/tasks/${taskId}/complete`, {
             method: "POST",
             headers: {
                 "X-Telegram-Init-Data": initData
